@@ -174,8 +174,8 @@ class TradingSession(object):
         """
         self._run_session()
         results = self.statistics.get_results()
-        self.write_dict(results)
-        results = self.read_dict()
+        #self.write_dict(results)
+        #results = self.read_dict()
         print("---------------------------------")
         print("Backtest complete.")
         print("Sharpe Ratio: %0.2f" % results["sharpe"])
