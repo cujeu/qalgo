@@ -98,6 +98,7 @@ def run(config, testing, tickers, filename):
         config, strategy, tickers,
         initial_equity, start_date, end_date,
         events_queue, position_sizer=position_sizer,
+        name = "rebalance",
         title=title, benchmark=tickers[0],
     )
     results = backtest.start_trading(testing=testing)
