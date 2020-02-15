@@ -39,14 +39,11 @@ class Portfolio(object):
                 ask = close_price
             pt.update_market_value(bid, ask)
             self.unrealised_pnl += pt.unrealised_pnl
-            self.equity += (
-                pt.market_value - pt.cost_basis + pt.realised_pnl
-            )
+            self.equity += (pt.market_value - pt.cost_basis + pt.realised_pnl)
 
     def _add_position(
         self, action, ticker,
-        quantity, price, commission
-    ):
+        quantity, price, commission):
         """
         Adds a new Position object to the Portfolio. This
         requires getting the best bid/ask price from the
@@ -65,20 +62,16 @@ class Portfolio(object):
                 ask = close_price
             position = Position(
                 action, ticker, quantity,
-                price, commission, bid, ask
-            )
+                price, commission, bid, ask)
             self.positions[ticker] = position
             self._update_portfolio()
         else:
-            print(
-                "Ticker %s is already in the positions list. "
-                "Could not add a new position." % ticker
-            )
+            print("Ticker %s is already in the positions list. "
+                  "Could not add a new position." % ticker)
 
     def _modify_position(
         self, action, ticker,
-        quantity, price, commission
-    ):
+        quantity, price, commission):
         """
         Modifies a current Position object to the Portfolio.
         This requires getting the best bid/ask price from the
@@ -90,8 +83,7 @@ class Portfolio(object):
         """
         if ticker in self.positions:
             self.positions[ticker].transact_shares(
-                action, quantity, price, commission
-            )
+                action, quantity, price, commission)
             if self.price_handler.istick():
                 bid, ask = self.price_handler.get_best_bid_ask(ticker)
             else:
@@ -107,15 +99,12 @@ class Portfolio(object):
 
             self._update_portfolio()
         else:
-            print(
-                "Ticker %s not in the current position list. "
-                "Could not modify a current position." % ticker
-            )
+            print("Ticker %s not in the current position list. "
+                  "Could not modify a current position." % ticker)
 
     def transact_position(
         self, action, ticker,
-        quantity, price, commission
-    ):
+        quantity, price, commission):
         """
         Handles any new position or modification to
         a current position, by calling the respective
@@ -133,10 +122,8 @@ class Portfolio(object):
         if ticker not in self.positions:
             self._add_position(
                 action, ticker, quantity,
-                price, commission
-            )
+                price, commission)
         else:
             self._modify_position(
                 action, ticker, quantity,
-                price, commission
-            )
+                price, commission)

@@ -29,8 +29,9 @@ class TradingSession(object):
         compliance=None, position_sizer=None,
         execution_handler=None, risk_manager=None,
         statistics=None, sentiment_handler=None,
-        name=None, title=None, benchmark=None
-    ):
+        name=None, title=None, benchmark=None,
+        is_plot = False):
+
         """
         Set up the backtest variables according to
         what has been passed in.
@@ -53,6 +54,7 @@ class TradingSession(object):
         self.name = name
         self.title = title
         self.benchmark = benchmark
+        self.is_plot = is_plot
         self.session_type = session_type
         self._config_session()
         self.cur_time = None
@@ -70,8 +72,7 @@ class TradingSession(object):
             self.price_handler = YahooDailyCsvBarPriceHandler(
                 self.config.CSV_DATA_DIR, self.events_queue,
                 self.tickers, start_date=self.start_date,
-                end_date=self.end_date
-            )
+                end_date=self.end_date )
 
         if self.position_sizer is None:
             self.position_sizer = FixedPositionSizer()
@@ -85,8 +86,7 @@ class TradingSession(object):
                 self.events_queue,
                 self.price_handler,
                 self.position_sizer,
-                self.risk_manager
-            )
+                self.risk_manager )
 
         if self.compliance is None:
             self.compliance = ExampleCompliance(self.config)
@@ -95,14 +95,12 @@ class TradingSession(object):
             self.execution_handler = IBSimulatedExecutionHandler(
                 self.events_queue,
                 self.price_handler,
-                self.compliance
-            )
+                self.compliance)
 
         if self.statistics is None:
             self.statistics = TearsheetStatistics(
                 self.config, self.portfolio_handler,
-                self.title, self.tickers[0], self.benchmark
-            )
+                self.title, self.tickers[0], self.benchmark)
 
     def _continue_loop_condition(self):
         if self.session_type == "backtest":
@@ -130,16 +128,11 @@ class TradingSession(object):
                 self.price_handler.stream_next()
             else:
                 if event is not None:
-                    if (
-                        event.type == EventType.TICK or
-                        event.type == EventType.BAR
-                    ):
+                    if (event.type == EventType.TICK or event.type == EventType.BAR):
                         self.cur_time = event.time
                         # Generate any sentiment events here
                         if self.sentiment_handler is not None:
-                            self.sentiment_handler.stream_next(
-                                stream_date=self.cur_time
-                            )
+                            self.sentiment_handler.stream_next(stream_date=self.cur_time)
                         self.strategy.calculate_signals(event)
                         self.portfolio_handler.update_portfolio_value()
                         self.statistics.update(event.time, self.portfolio_handler)
@@ -176,15 +169,14 @@ class TradingSession(object):
         results = self.statistics.get_results()
         #self.write_dict(results)
         #results = self.read_dict()
+        #write_perf()
         print("---------------------------------")
         print("Backtest complete.")
         print("Sharpe Ratio: %0.2f" % results["sharpe"])
-        print(
-            "Max Drawdown: %0.2f%%" % (
-                results["max_drawdown_pct"] * 100.0
-            )
-        )
+        print("Max Drawdown: %0.2f%%" % (results["max_drawdown_pct"] * 100.0) )
         if not testing:
-            print("plot results.")
-            self.statistics.plot_results() ##self.tickers[0] + ".png")
+            if self.is_plot:
+                print("plot results.")
+                self.statistics.plot_results() ##self.tickers[0] + ".png")
         return results
+

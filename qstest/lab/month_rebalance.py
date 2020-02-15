@@ -15,25 +15,21 @@ from qstrader.trading_session import TradingSession
 import queue
 import pickle
 
-class MovingAverageCrossStrategy(AbstractStrategy):
+class MonthRebalanceStrategy(AbstractStrategy):
     """
     Requires:
     ticker - The ticker symbol being used for moving averages
     events_queue - A handle to the system events queue
-    short_window - Lookback period for short moving average
-    long_window - Lookback period for long moving average
     """
     def __init__(
-        self, ticker,
+        self, ticker_pool,
         events_queue,
-        short_window=100,
-        long_window=300,
         base_quantity=100
     ):
-        self.ticker = ticker
+        self.ticker_pool = ticker_pool
+        self.buy_list = []
+        self.buy_num = 5
         self.events_queue = events_queue
-        self.short_window = short_window
-        self.long_window = long_window
         self.base_quantity = base_quantity
         self.bars = 0
         self.invested = False
@@ -78,7 +74,7 @@ class MovingAverageCrossStrategy(AbstractStrategy):
 
 def run(config, testing, tickers, filename):
     # Backtest information
-    title = ['Moving Average Crossover Example']
+    title = ['Reblance Example']
     initial_equity = 10000.0
     ##start_date = datetime.datetime(2011, 1, 1)
     ##end_date = datetime.datetime(2020, 1, 1)
@@ -87,10 +83,9 @@ def run(config, testing, tickers, filename):
 
     # Use the MAC Strategy
     events_queue = queue.Queue()
-    strategy = MovingAverageCrossStrategy(
-        tickers[0], events_queue,
-        short_window=50,
-        long_window=100)
+    strategy = MonthRebalanceStrategy(
+        tickers, events_queue
+    )
 
     # Set up the backtest
     backtest = TradingSession(
@@ -98,9 +93,10 @@ def run(config, testing, tickers, filename):
         initial_equity, start_date, end_date,
         events_queue,
         session_type="backtest",
-        name = "strategy1",
+        name = "month_reb",
         title=title,
-        benchmark=tickers[1],)
+        benchmark=None
+    )
     results = backtest.start_trading(testing=testing)
     return results
 
@@ -110,13 +106,8 @@ if __name__ == "__main__":
     testing = False
     #config = settings.from_file(settings.DEFAULT_CONFIG_FILENAME, testing)
     conf = Config()
-    ticker_list = ["AAPL", "ADI"]
-    bencht = "SPY"
-    ##tickers = ["PEP", "PM"]
+    ticker_list = ["AAPL", "ADI", "ACN", "ANET", "CTSH",
+                   "GLW",  "JKHY", "MSI", "PYPL", "V"]
+    bencht = None
     filename = None
-    for t in ticker_list:
-        tickers = []
-        tickers.append(t)
-        tickers.append(bencht)
-        print(tickers)
-        run(conf, testing, tickers, filename)
+    run(conf, testing, ticker_list, filename)

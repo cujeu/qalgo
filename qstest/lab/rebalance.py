@@ -55,10 +55,9 @@ class MonthlyLiquidateRebalanceStrategy(AbstractStrategy):
         a liquidation signal, as well as a purchase signal,
         for each ticker.
         """
-        if (
-            event.type in [EventType.BAR, EventType.TICK] and
-            self._end_of_month(event.time)
-        ):
+        is_new = False
+        if (event.type in [EventType.BAR, EventType.TICK] and
+            self._end_of_month(event.time) ):
             ticker = event.ticker
             if self.tickers_invested[ticker]:
                 liquidate_signal = SignalEvent(ticker, "EXIT")
@@ -66,32 +65,25 @@ class MonthlyLiquidateRebalanceStrategy(AbstractStrategy):
             long_signal = SignalEvent(ticker, "BOT")
             self.events_queue.put(long_signal)
             self.tickers_invested[ticker] = True
+            newEvent = True
+        return is_new
 
 
 def run(config, testing, tickers, filename):
     # Backtest information
-    title = [
-        'Monthly Liquidate/Rebalance on 60%/40% SPY/ADI Portfolio'
-    ]
-    initial_equity = 500000.0
+    title = ['Monthly Liquidate/Rebalance on Portfolio']
+    initial_equity = 100000.0
     start_date = datetime.datetime(2015, 1, 1)
     end_date = datetime.datetime(2020, 1, 1)
 
     # Use the Monthly Liquidate And Rebalance strategy
     events_queue = queue.Queue()
-    strategy = MonthlyLiquidateRebalanceStrategy(
-        tickers, events_queue
-    )
+    strategy = MonthlyLiquidateRebalanceStrategy(tickers, events_queue)
 
     # Use the liquidate and rebalance position sizer
     # with prespecified ticker weights
-    ticker_weights = {
-        "SPY": 0.6,
-        "ADI": 0.4,
-    }
-    position_sizer = LiquidateRebalancePositionSizer(
-        ticker_weights
-    )
+    ticker_weights = {"AAPL": 0.4, "ADI": 0.4 , "SPY": 0.2}
+    position_sizer = LiquidateRebalancePositionSizer(ticker_weights)
 
     # Set up the backtest
     backtest = TradingSession(
@@ -99,8 +91,7 @@ def run(config, testing, tickers, filename):
         initial_equity, start_date, end_date,
         events_queue, position_sizer=position_sizer,
         name = "rebalance",
-        title=title, benchmark=tickers[0],
-    )
+        title=title, benchmark=tickers[-1],)
     results = backtest.start_trading(testing=testing)
     return results
 
@@ -111,5 +102,7 @@ if __name__ == "__main__":
     #config = settings.from_file(settings.DEFAULT_CONFIG_FILENAME, testing)
     conf = Config()
     filename = None
-    tickers = ["SPY", "ADI"]
-    run(conf, testing, tickers, filename)
+    tickers = ["AAPL", "ADI", "SPY"]
+    results = run(conf, testing, tickers, filename)
+    #print(type(results))
+

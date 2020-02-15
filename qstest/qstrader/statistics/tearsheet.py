@@ -32,8 +32,7 @@ class TearsheetStatistics(AbstractStatistics):
         self, config, portfolio_handler,
         title=None, ticker=None,
         benchmark=None, periods=252,
-        rolling_sharpe=False
-    ):
+        rolling_sharpe=False):
         """
         Takes in a portfolio handler.
         """
@@ -55,12 +54,11 @@ class TearsheetStatistics(AbstractStatistics):
         over time.
         """
         self.equity[timestamp] = PriceParser.display(
-            self.portfolio_handler.portfolio.equity
-        )
+            self.portfolio_handler.portfolio.equity)
+
         if self.benchmark is not None:
             self.equity_benchmark[timestamp] = PriceParser.display(
-                self.price_handler.get_last_close(self.benchmark)
-            )
+                self.price_handler.get_last_close(self.benchmark))
 
     def get_results(self):
         """
@@ -75,8 +73,7 @@ class TearsheetStatistics(AbstractStatistics):
         # Rolling Annualised Sharpe
         rolling = returns_s.rolling(window=self.periods)
         rolling_sharpe_s = np.sqrt(self.periods) * (
-            rolling.mean() / rolling.std()
-        )
+            rolling.mean() / rolling.std())
 
         # Cummulative Returns
         cum_returns_s = np.exp(np.log(1 + returns_s).cumsum())
@@ -180,16 +177,16 @@ class TearsheetStatistics(AbstractStatistics):
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
         ax.xaxis.grid(linestyle=':')
 
+        #print label in cumulative rolling
         if self.benchmark is not None:
             benchmark = stats['cum_returns_b']
             benchmark.plot(
-                ##lw=2, color='gray', label=self.benchmark, alpha=0.60,
-                lw=2, color='gray', label=self.ticker, alpha=0.60,
+                lw=2, color='gray', label=self.benchmark, alpha=0.60,
                 ax=ax, **kwargs
             )
 
         equity.plot(lw=2, color='green', alpha=0.6, x_compat=False,
-                    label=self.benchmark, ax=ax, **kwargs)
+                    label=self.ticker, ax=ax, **kwargs)
                     ##label='Backtest', ax=ax, **kwargs)
 
         ax.axhline(1.0, linestyle='--', color='black', lw=1)
@@ -284,8 +281,7 @@ class TearsheetStatistics(AbstractStatistics):
             columns={1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr',
                      5: 'May', 6: 'Jun', 7: 'Jul', 8: 'Aug',
                      9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'},
-            inplace=True
-        )
+            inplace=True)
 
         sns.heatmap(
             monthly_ret.fillna(0) * 100.0,

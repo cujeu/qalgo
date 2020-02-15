@@ -28,7 +28,9 @@ class PriceParser(object):
     """
 
     # 10,000,000
-    PRICE_MULTIPLIER = 10000000
+    # PRICE_MULTIPLIER = 10000000
+    # jun changed to 100
+    PRICE_MULTIPLIER = 100
 
     """Parse Methods. Multiplies a float out into an int if needed."""
 

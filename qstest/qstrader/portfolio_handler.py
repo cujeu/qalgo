@@ -47,8 +47,7 @@ class PortfolioHandler(object):
         order = SuggestedOrder(
             signal_event.ticker,
             signal_event.action,
-            quantity=quantity
-        )
+            quantity=quantity)
         return order
 
     def _place_orders_onto_queue(self, order_list):
@@ -80,8 +79,7 @@ class PortfolioHandler(object):
         # Create or modify the position from the fill info
         self.portfolio.transact_position(
             action, ticker, quantity,
-            price, commission
-        )
+            price, commission)
 
     def on_signal(self, signal_event):
         """
@@ -98,12 +96,10 @@ class PortfolioHandler(object):
         initial_order = self._create_order_from_signal(signal_event)
         # Size the quantity of the initial order
         sized_order = self.position_sizer.size_order(
-            self.portfolio, initial_order
-        )
+            self.portfolio, initial_order)
         # Refine or eliminate the order via the risk manager overlay
         order_events = self.risk_manager.refine_orders(
-            self.portfolio, sized_order
-        )
+            self.portfolio, sized_order)
         # Place orders onto events queue
         self._place_orders_onto_queue(order_events)
 

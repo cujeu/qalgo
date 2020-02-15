@@ -18,6 +18,20 @@ def aggregate_returns(returns, convert_to):
              lambda x: x.month,
              lambda x: x.isocalendar()[1]]).apply(cumulate_returns)
     elif convert_to == 'monthly':
+        """
+        2015  1     0.000000
+        ...
+              5     0.000000
+              6    -0.037700
+              10    0.000000
+        =====>
+            level_0  level_1         0
+        0      2015        1  0.000000
+        ....
+        5      2015        6 -0.037700
+        6      2015        7 -0.060896
+        7      2015        8  0.007303
+        """
         return returns.groupby(
             [lambda x: x.year, lambda x: x.month]).apply(cumulate_returns)
     elif convert_to == 'yearly':

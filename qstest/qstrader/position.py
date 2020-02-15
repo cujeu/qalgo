@@ -5,8 +5,7 @@ class Position(object):
     def __init__(
         self, action, ticker, init_quantity,
         init_price, init_commission,
-        bid, ask
-    ):
+        bid, ask):
         """
         Set up the initial "account" of the Position to be
         zero for most items, with the exception of the initial
@@ -72,6 +71,8 @@ class Position(object):
         allows calculation of the unrealised and realised profit
         and loss of any transactions.
         """
+
+        ## floor division
         midpoint = (bid + ask) // 2
         self.market_value = self.quantity * midpoint * sign(self.net)
         self.unrealised_pnl = self.market_value - self.cost_basis
@@ -89,36 +90,28 @@ class Position(object):
 
         # Adjust total bought and sold
         if action == "BOT":
-            self.avg_bot = (
-                self.avg_bot * self.buys + price * quantity
-            ) // (self.buys + quantity)
+            self.avg_bot = (self.avg_bot * self.buys + price * quantity) // \
+                           (self.buys + quantity)
             if self.action != "SLD":  # Increasing long position
-                self.avg_price = (
-                    self.avg_price * self.buys +
-                    price * quantity + commission
-                ) // (self.buys + quantity)
+                self.avg_price = (self.avg_price * self.buys + price * quantity + commission) // \
+                                 (self.buys + quantity)
             elif self.action == "SLD":  # Closed partial positions out
-                self.realised_pnl += quantity * (
-                    self.avg_price - price
-                ) - commission  # Adjust realised PNL
+                self.realised_pnl += quantity * (self.avg_price - price) - \
+                                     commission  # Adjust realised PNL
             self.buys += quantity
             self.total_bot = self.buys * self.avg_bot
 
         # action == "SLD"
         else:
-            self.avg_sld = (
-                self.avg_sld * self.sells + price * quantity
-            ) // (self.sells + quantity)
+            self.avg_sld = (self.avg_sld * self.sells + price * quantity) // \
+                           (self.sells + quantity)
             if self.action != "BOT":  # Increasing short position
-                self.avg_price = (
-                    self.avg_price * self.sells +
-                    price * quantity - commission
-                ) // (self.sells + quantity)
+                self.avg_price = (self.avg_price * self.sells + price * quantity - commission) // \
+                                 (self.sells + quantity)
                 self.unrealised_pnl -= commission
             elif self.action == "BOT":  # Closed partial positions out
-                self.realised_pnl += quantity * (
-                    price - self.avg_price
-                ) - commission
+                self.realised_pnl += quantity * (price - self.avg_price) - \
+                                     commission
             self.sells += quantity
             self.total_sld = self.sells * self.avg_sld
 
